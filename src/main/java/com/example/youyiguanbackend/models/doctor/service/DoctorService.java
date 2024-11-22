@@ -3,6 +3,7 @@ package com.example.youyiguanbackend.models.doctor.service;
 import com.example.youyiguanbackend.common.doctor.Result.Result;
 import com.example.youyiguanbackend.models.doctor.pojo.Doctor;
 
+import java.io.IOException;
 import java.util.Map;
 
 /**
@@ -15,4 +16,6 @@ public interface DoctorService {
     boolean sendCode(String phoneNumber);
 
     boolean checkVCode(String phoneNumber, String vCode);
+
+    boolean validateFace(String base64String) throws IOException;
 }

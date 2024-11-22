@@ -10,6 +10,7 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -57,6 +58,21 @@ public class DoctorController {
             return Result.success().code(200).message("验证码验证成功");
         }else {
             return Result.error(401,"验证码错误或已过期");
+        }
+    }
+
+    @PostMapping("/validate-face")
+    /**
+     * 验证上传的人脸图片数据的质量,同时将人脸数据存储
+     */
+    public Result<?> validateFace(@RequestBody Map<String, String> faceImageBase64Map) throws IOException {
+        // 获取上传的人脸图片，转换为base64编码
+        String base64String = faceImageBase64Map.get("face_image_base64");
+        System.out.println(base64String);
+        if(doctorService.validateFace(base64String)){
+            return Result.success().code(200).message("人脸数据验证成功");
+        }else {
+            return Result.error(401,"上传的人脸数据质量不合格");
         }
     }
 
