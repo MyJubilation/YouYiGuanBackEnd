@@ -1,17 +1,14 @@
 package com.example.youyiguanbackend.models.doctor.controller;
 
 import com.example.youyiguanbackend.common.doctor.Result.Result;
-import com.example.youyiguanbackend.common.doctor.Util.RandomUtil;
-import com.example.youyiguanbackend.models.doctor.dto.RegisterDTO;
-import com.example.youyiguanbackend.models.doctor.pojo.Doctor;
+import com.example.youyiguanbackend.common.doctor.Util.ConstantUtil;
+import com.example.youyiguanbackend.models.doctor.model.dto.RegisterDTO;
+import com.example.youyiguanbackend.models.doctor.model.pojo.RegisterVO;
 import com.example.youyiguanbackend.models.doctor.service.DoctorService;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
-import java.util.HashMap;
 import java.util.Map;
 
 
@@ -35,7 +32,7 @@ public class DoctorController {
      * 给用户手机发送短信
      */
     public Result<?> requestVerificationCode(@RequestBody Map<String, String> phoneNumberMap) {
-        String phoneNumber = phoneNumberMap.get("phoneNumber");
+        String phoneNumber = phoneNumberMap.get("phone_number");
         // 获取验证码并发送
         if(doctorService.sendCode(phoneNumber)){
             return Result.success().code(200).message("验证码已发送");
@@ -68,11 +65,27 @@ public class DoctorController {
     public Result<?> validateFace(@RequestBody Map<String, String> faceImageBase64Map) throws IOException {
         // 获取上传的人脸图片，转换为base64编码
         String base64String = faceImageBase64Map.get("face_image_base64");
-        System.out.println(base64String);
-        if(doctorService.validateFace(base64String)){
+        int type = doctorService.validateFace(base64String);
+        if(type == ConstantUtil.FaceIdSetSuccess){
             return Result.success().code(200).message("人脸数据验证成功");
+        }else if(type == ConstantUtil.FaceIdAlreadyExist) {
+            return Result.error(222203,"上传的人脸数据已经录入");
         }else {
             return Result.error(401,"上传的人脸数据质量不合格");
+        }
+    }
+
+    @PostMapping("/register")
+    /**
+     * 医生注册相关功能
+     */
+    public Result<?> register(@RequestBody RegisterDTO registerDTO) {
+        // TODO 接收存入后的doctor_id和status
+        RegisterVO registerVO = doctorService.register(registerDTO);
+        if(registerVO != null){
+            return Result.success().code(200).message("注册成功").data(registerVO);
+        }else {
+            return Result.error(401,"注册失败，请检查输入信息");
         }
     }
 

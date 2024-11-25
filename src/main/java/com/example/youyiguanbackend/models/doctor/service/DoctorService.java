@@ -1,10 +1,9 @@
 package com.example.youyiguanbackend.models.doctor.service;
 
-import com.example.youyiguanbackend.common.doctor.Result.Result;
-import com.example.youyiguanbackend.models.doctor.pojo.Doctor;
+import com.example.youyiguanbackend.models.doctor.model.dto.RegisterDTO;
+import com.example.youyiguanbackend.models.doctor.model.pojo.RegisterVO;
 
 import java.io.IOException;
-import java.util.Map;
 
 /**
  * @author beetles
@@ -17,5 +16,7 @@ public interface DoctorService {
 
     boolean checkVCode(String phoneNumber, String vCode);
 
-    boolean validateFace(String base64String) throws IOException;
+    int validateFace(String base64String) throws IOException;
+
+    RegisterVO register(RegisterDTO registerDTO);
 }

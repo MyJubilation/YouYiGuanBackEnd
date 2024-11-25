@@ -1,4 +1,4 @@
-package com.example.youyiguanbackend.models.doctor.dto.Enum;
+package com.example.youyiguanbackend.models.doctor.model.dto.Enum;
 
 /**
  * @author beetles

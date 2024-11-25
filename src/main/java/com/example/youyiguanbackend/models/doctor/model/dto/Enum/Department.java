@@ -1,4 +1,4 @@
-package com.example.youyiguanbackend.models.doctor.dto.Enum;
+package com.example.youyiguanbackend.models.doctor.model.dto.Enum;
 
 /**
  * @author beetles
@@ -13,7 +13,7 @@ public enum Department {
     TCMOPHTHALMOLOGY("中医五官科"),
     TCMORTHOPEDICSANDTRAUMATOLOGY("中医骨伤科"),
     TCMHEALTHCAREDEPARTMENT("中医保健科"),
-    TCMACUPUNCTURETUINA("针灸推拿");
+    TCMACUPUNCTURETUINA("针灸推拿科");
 
     private String description;
     Department(String description) {

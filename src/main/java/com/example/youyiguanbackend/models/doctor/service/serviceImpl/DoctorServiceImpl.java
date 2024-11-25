@@ -1,11 +1,20 @@
 package com.example.youyiguanbackend.models.doctor.service.serviceImpl;
 
-import com.example.youyiguanbackend.common.doctor.Result.Result;
+import com.example.youyiguanbackend.common.doctor.Util.ConstantUtil;
 import com.example.youyiguanbackend.common.doctor.Util.GsonUtils;
 import com.example.youyiguanbackend.common.doctor.Util.HttpUtil;
-import com.example.youyiguanbackend.models.doctor.pojo.Doctor;
+import com.example.youyiguanbackend.common.doctor.common.BaseContext;
+import com.example.youyiguanbackend.models.doctor.mapper.DoctorMapper;
+import com.example.youyiguanbackend.models.doctor.model.dto.Enum.Department;
+import com.example.youyiguanbackend.models.doctor.model.dto.Enum.ExperienceLevel;
+import com.example.youyiguanbackend.models.doctor.model.dto.Enum.Gender;
+import com.example.youyiguanbackend.models.doctor.model.dto.Enum.Status;
+import com.example.youyiguanbackend.models.doctor.model.dto.RegisterDTO;
+import com.example.youyiguanbackend.models.doctor.model.pojo.Doctor;
+import com.example.youyiguanbackend.models.doctor.model.pojo.RegisterVO;
 import com.example.youyiguanbackend.models.doctor.service.DoctorService;
 import com.google.code.kaptcha.impl.DefaultKaptcha;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
@@ -15,6 +24,7 @@ import org.json.JSONObject;
 
 import java.io.*;
 
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
@@ -31,6 +41,8 @@ public class DoctorServiceImpl implements DoctorService {
     private DefaultKaptcha defaultKaptcha;
     @Autowired
     private StringRedisTemplate stringRedisTemplate;
+    @Autowired
+    private DoctorMapper doctorMapper;
 
     // 人脸识别keys
     public static final String API_KEY = "nL0dvdtgHgW9Av262KnaImzr";
@@ -73,7 +85,7 @@ public class DoctorServiceImpl implements DoctorService {
      * TODO 验证上传的人脸图片数据的质量,同时将人脸数据存储
      */
     @Override
-    public boolean validateFace(String base64String) throws IOException {
+    public int validateFace(String base64String) throws IOException {
 
         // 请求url
         String url = "https://aip.baidubce.com/rest/2.0/face/v3/faceset/user/add";
@@ -92,27 +104,98 @@ public class DoctorServiceImpl implements DoctorService {
 
             String result = HttpUtil.post(url, accessToken, "application/json", param);
             System.out.println(result);
-            // 判断result中error_code的值，如果为0则表示成功，其他则失败   222203为人脸图像已经录入
+            // 判断result中error_code的值，如果为0则表示成功，其他则失败  TODO 222203为人脸图像已经录入
             // 使用JSONObject解析字符串
             JSONObject responseJson = new JSONObject(result);
             // 获取error_code的值
             int errorCode = responseJson.getInt("error_code");
             // 判断error_code的值
-            if (errorCode == 0) {
-                return true;
-            } else {
-                return false;
+            if (errorCode == 0) { // 人脸数据注册成功
+                // 获取face_token值
+                JSONObject data = responseJson.getJSONObject("result");
+                String faceToken = data.getString("face_token");
+                // 先暂时存入缓存中，后续注册成功才将人脸数据一块输入
+                // 将face_token存入缓存
+                stringRedisTemplate.opsForValue().set("faceToken", faceToken,1, TimeUnit.HOURS);
+                // TODO 如果注册失败则需要将人脸数据从人脸库中删除
+
+                return ConstantUtil.FaceIdSetSuccess;
+            } else if (errorCode == 223105) { // 人脸数据已经存在
+                return ConstantUtil.FaceIdAlreadyExist;
+            }else { // 人脸数据注册失败
+                return ConstantUtil.FaceIdSetError;
             }
         } catch (Exception e) {
             e.printStackTrace();
         }
-        return false;
+        return ConstantUtil.FaceIdSetError;
     }
 
+    /**
+     *  用于注册功能的实现
+     * @param registerDTO
+     * @return
+     */
+    @Override
+    public RegisterVO register(RegisterDTO registerDTO) {
+        // 将DTO转换为实体类
+        Doctor doctor = new Doctor();
+        // 获取face_token并存入实体类中,并存储当前时间到accountCreationDate中,将DTO转换为实体类
+        String faceToken = stringRedisTemplate.opsForValue().get("faceToken");
+        doctor.setName(registerDTO.getName());
+        doctor.setAge(registerDTO.getAge());
+        doctor.setHospitalName(registerDTO.getHospital_name());
+        doctor.setContactNumber(registerDTO.getContact_number());
+        doctor.setEmail(registerDTO.getEmail());
+        doctor.setUsername(registerDTO.getUsername());
+        doctor.setPassword(registerDTO.getPassword());
+        doctor.setFaceImageUrl(registerDTO.getFace_image_ase64());
+
+        doctor.setPermissionLevel(1); // 暂定1为最低等级
+        doctor.setAiDiagnosisReviewEnabled(1);
+
+        doctor.setFaceToken(faceToken);
+        doctor.setAccountCreationDate(LocalDateTime.now());
+        doctor.setStatus(Status.SUCCESS);
+        // 判断并传值
+        if(registerDTO.getGender().equals("男")){
+            doctor.setGender(Gender.MAN);
+        }else if(registerDTO.getGender().equals("女")){
+            doctor.setGender(Gender.WOMAN);
+        }else {
+            return null;
+        }
+        for(ExperienceLevel e : ExperienceLevel.values()){
+            if(e.getDescription().toString().equals(registerDTO.getExperience_level())){
+                doctor.setExperienceLevel(e);
+            }
+        }
+        for(Department d : Department.values()){
+            if(d.getDescription().toString().equals(registerDTO.getDepartment())){
+                doctor.setDepartment(d);
+            }
+        }
+        // 如果有任何值错误，则返回false
+        if(doctor.getExperienceLevel() == null || doctor.getDepartment() == null){
+            return null;
+        }
+        // 判断数据库是否已经有数据，如果有返回null
+        if(doctorMapper.selectDoctorUserNameAndEmail(doctor) != null){
+            return null;
+        }
+        //  存储到数据库
+        RegisterVO registerVO = new RegisterVO();
+        doctorMapper.insertDoctor(doctor);
+        registerVO.setDoctorId(doctor.getDoctor_id());
+        registerVO.setStatus("激活");
+        // 将faceToken从redis中删除
+        stringRedisTemplate.delete("faceToken");
+        //  返回逻辑实现
+        return registerVO;
+    }
 
     /**
      * 从用户的AK，SK生成鉴权签名（Access Token）
-     *
      * @return 鉴权签名（Access Token）
      * @throws IOException IO异常
      */

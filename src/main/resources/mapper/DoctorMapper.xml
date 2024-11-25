@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.example.youyiguanbackend.models.doctor.mapper.DoctorMapper">
+
+<insert id="insertDoctor">
+    <selectKey keyProperty="doctor_id" resultType="int" order="AFTER">
+        SELECT LAST_INSERT_ID()
+    </selectKey>
+INSERT INTO doctor ( name, gender, age, experience_level, hospital_name, contact_number, email, username, password, status, account_creation_date
+, permission_level, ai_diagnosis_review_enabled, face_image_url, department, face_token )
+VALUES
+(
+#{name},
+#{gender.description},
+#{age},
+#{experienceLevel.description},
+#{hospitalName},
+#{contactNumber},
+#{email},
+#{username},
+#{password},
+#{status.description},
+#{accountCreationDate},
+#{permissionLevel},
+#{aiDiagnosisReviewEnabled},
+#{faceImageUrl},
+#{department.description},
+#{faceToken}
+)
+</insert>
+
+<select id="selectDoctorUserNameAndEmail" resultType="com.example.youyiguanbackend.models.doctor.model.pojo.SelectDoctorUserNameAndEmailVO">
+    SELECT
+        *
+    FROM
+        doctor
+    WHERE
+        username = #{username}
+       OR email = #{email}
+</select>
+
+</mapper>
