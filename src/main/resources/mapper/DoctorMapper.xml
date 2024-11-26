@@ -59,4 +59,29 @@ VALUES
             username = #{name}
     </update>
 
+    <select id="selectDoctorByFaceAndUsername" resultType="com.example.youyiguanbackend.models.doctor.model.pojo.LoginVO">
+        SELECT *
+        FROM
+            doctor
+        WHERE
+            face_token = #{faceToken}
+         AND    username = #{username}
+    </select>
+
+    <select id="selectDoctorByPhone" resultType="com.example.youyiguanbackend.models.doctor.model.pojo.LoginVO">
+        SELECT *
+        FROM
+            doctor
+        WHERE
+            contact_number = #{contact_number}
+    </select>
+
+    <select id="selectFaceToken" resultType="com.example.youyiguanbackend.models.doctor.model.pojo.Doctor">
+        SELECT *
+        FROM
+            doctor
+        WHERE
+            face_token = #{faceToken}
+    </select>
+
 </mapper>

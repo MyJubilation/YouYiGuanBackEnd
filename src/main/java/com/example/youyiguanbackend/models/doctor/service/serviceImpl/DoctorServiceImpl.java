@@ -9,13 +9,13 @@ import com.example.youyiguanbackend.models.doctor.model.dto.Enum.Department;
 import com.example.youyiguanbackend.models.doctor.model.dto.Enum.ExperienceLevel;
 import com.example.youyiguanbackend.models.doctor.model.dto.Enum.Gender;
 import com.example.youyiguanbackend.models.doctor.model.dto.Enum.Status;
+import com.example.youyiguanbackend.models.doctor.model.dto.LoginByFaceDTO;
 import com.example.youyiguanbackend.models.doctor.model.dto.LoginDTO;
 import com.example.youyiguanbackend.models.doctor.model.dto.RegisterDTO;
-import com.example.youyiguanbackend.models.doctor.model.pojo.Doctor;
-import com.example.youyiguanbackend.models.doctor.model.pojo.LoginVO;
-import com.example.youyiguanbackend.models.doctor.model.pojo.RegisterVO;
+import com.example.youyiguanbackend.models.doctor.model.pojo.*;
 import com.example.youyiguanbackend.models.doctor.service.DoctorService;
 import com.google.code.kaptcha.impl.DefaultKaptcha;
+import org.json.JSONArray;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
@@ -30,6 +30,7 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -56,7 +57,7 @@ public class DoctorServiceImpl implements DoctorService {
 
     @Override
     /**
-     * 获取验证码文本并发送验证码到对应手机号
+     * TODO 获取验证码文本并发送验证码到对应手机号
      */
     public boolean sendCode(String phoneNumber) {
         // 获取验证码
@@ -93,11 +94,65 @@ public class DoctorServiceImpl implements DoctorService {
         // 请求url
         String url = "https://aip.baidubce.com/rest/2.0/face/v3/faceset/user/add";
         try {
+            // 获取自增id，仅用于人脸库存储，不用于后端查询,可以通过数据库查询来将id绑定为名字
+            if (stringRedisTemplate.opsForValue().get("faceDatabaseId") == null) {
+                stringRedisTemplate.opsForValue().set("faceDatabaseId", "1");
+            } else {
+                // 查询当前base64String对应faceToken是否已经存在人脸库中
+                String urlSelect = "https://aip.baidubce.com/rest/2.0/face/v3/search";
+                Map<String, Object> selectFaceDB = new HashMap<>();
+                selectFaceDB.put("image", base64String);
+                selectFaceDB.put("group_id_list", "doctor");
+                selectFaceDB.put("image_type", "BASE64");
+                String param = GsonUtils.toJson(selectFaceDB);
+
+                String accessTokenSelect = getAccessToken();
+
+                String resultSelect = HttpUtil.post(urlSelect, accessTokenSelect, "application/json", param);
+                /**
+                 * {
+                 *   "error_code" : 0,
+                 *   "error_msg" : "SUCCESS",
+                 *   "log_id" : 3937975327,
+                 *   "timestamp" : 1732627058,
+                 *   "cached" : 0,
+                 *   "result" : {
+                 *     "face_token" : "b9bce9723b53bc39dbcee1e6ad476a78",
+                 *     "user_list" : [ {
+                 *       "group_id" : "doctor",
+                 *       "user_id" : "16",
+                 *       "user_info" : "",
+                 *       "score" : 100
+                 *     } ]
+                 *   }
+                 * }
+                 */
+                JSONObject result = new JSONObject(resultSelect);
+                if(result.getInt("error_code") == 0){
+                    // 获取faceToken
+                    JSONObject data = result.getJSONObject("result");
+                    String faceToken = data.getString("face_token");
+                    if(doctorMapper.selectFaceToken(faceToken)!= null){
+                        // 存在faceToken
+                        return ConstantUtil.FaceIdAlreadyExist;
+                    }
+                    // 查询数据库是否存在
+                }else {
+                    return ConstantUtil.FaceIdSetError;
+                }
+
+                // 将获取的字符串转换为整数
+                int currentId = Integer.parseInt(Objects.requireNonNull(stringRedisTemplate.opsForValue().get("faceDatabaseId")));
+                // 进行数值加法
+                int newId = currentId + 1;
+                // 将结果转换回字符串并设置回Redis
+                stringRedisTemplate.opsForValue().set("faceDatabaseId", String.valueOf(newId));
+            }
             Map<String, Object> map = new HashMap<>();
-            // TODO 人脸识别的人脸组库，用户id,可以通过数据库查询来将id绑定为名字
+            // 人脸识别的人脸组库，用户id
             map.put("image", base64String);
-            map.put("group_id", "group_repeat");
-            map.put("user_id", "user1");
+            map.put("group_id", "doctor");
+            map.put("user_id", stringRedisTemplate.opsForValue().get("faceDatabaseId"));
             map.put("image_type", "BASE64");
 
             String param = GsonUtils.toJson(map);
@@ -136,8 +191,6 @@ public class DoctorServiceImpl implements DoctorService {
 
     /**
      *  用于注册功能的实现
-     * @param registerDTO
-     * @return
      */
     @Override
     public RegisterVO register(RegisterDTO registerDTO) {
@@ -206,10 +259,6 @@ public class DoctorServiceImpl implements DoctorService {
         if(vo != null){
             // 获取当前时间
             LocalDateTime now = LocalDateTime.now();
-            // // 创建一个DateTimeFormatter对象，指定要格式化的样式
-            // DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-            // // 使用formatter格式化LocalDateTime对象
-            // String formattedDate = now.format(formatter);
             // 将现在时间存入返回VO中
             vo.setLast_login(now);
             // 将lastLogin存入数据库中
@@ -218,6 +267,114 @@ public class DoctorServiceImpl implements DoctorService {
         }else {
             return null;
         }
+    }
+
+    /**
+     * 医生人脸登录
+     */
+    @Override
+    public LoginVO loginByFace(LoginByFaceDTO loginByFaceDTO) {
+        // 人脸检测，获取faceToken
+        String url = "https://aip.baidubce.com/rest/2.0/face/v3/detect";
+        try {
+            Map<String, Object> map = new HashMap<>();
+            map.put("image", loginByFaceDTO.getFace_image_base64());
+            map.put("image_type", "BASE64");
+            String param = GsonUtils.toJson(map);
+            String accessToken = getAccessToken();
+            String result = HttpUtil.post(url, accessToken, "application/json", param);
+            // 判断result中error_code的值，如果为0则表示成功，其他则失败
+            // 使用JSONObject解析字符串
+            JSONObject responseJson = new JSONObject(result);
+            /**
+             * 返回的result的json为：
+             * {
+             *   "result" : {
+             *     "face_num" : 1,
+             *     "face_list" : [ {
+             *       "angle" : {
+             *         "roll" : -2.39,
+             *         "pitch" : 8.54,
+             *         "yaw" : -2.87
+             *       },
+             *       "face_token" : "b9bce9723b53bc39dbcee1e6ad476a78",
+             *       "location" : {
+             *         "top" : 495.49,
+             *         "left" : 311.27,
+             *         "rotation" : 0,
+             *         "width" : 474,
+             *         "height" : 434
+             *       },
+             *       "face_probability" : 1
+             *     } ]
+             *   },
+             *   "log_id" : 3937936291,
+             *   "error_msg" : "SUCCESS",
+             *   "cached" : 0,
+             *   "error_code" : 0,
+             *   "timestamp" : 1732622092
+             * }
+             */
+            // 获取error_code的值
+            int errorCode = responseJson.getInt("error_code");
+            // 判断error_code的值
+            if (errorCode == 0) { // 人脸数据注册成功
+                // 获取face_token值
+                JSONObject dataResult = responseJson.getJSONObject("result");
+                JSONArray faceList = dataResult.getJSONArray("face_list");
+                JSONObject firstFace = faceList.getJSONObject(0);
+                String faceToken = firstFace.getString("face_token");
+                // 将faceToken与username在数据库中查询，返回值LoginVO
+                LoginByFaceVO vo = new LoginByFaceVO();
+                vo.setFaceToken(faceToken);
+                vo.setUsername(loginByFaceDTO.getUsername());
+                LoginVO loginVO = doctorMapper.selectDoctorByFaceAndUsername(vo);
+                if(loginVO != null){
+                    // 将最新时间存入loginVO
+                    // 获取当前时间
+                    LocalDateTime now = LocalDateTime.now();
+                    // 将现在时间存入返回VO中
+                    loginVO.setLast_login(now);
+                    // 将lastLogin存入数据库中
+                    doctorMapper.updateLastLogin(loginVO);
+                    return loginVO;
+                }else {
+                    return null;
+                }
+            }else { // 人脸数据注册失败
+                return null;
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    /**
+     * 医生手机号登录
+     */
+    @Override
+    public LoginVO loginByPhone(LoginByPhoneDTO loginByPhoneDTO) {
+        // 判断手机号和验证码是否正确
+        if(Objects.equals(stringRedisTemplate.opsForValue().get("code"), loginByPhoneDTO.getVerification_code()) &&
+                Objects.equals(stringRedisTemplate.opsForValue().get("phoneNumber"), loginByPhoneDTO.getContact_number())){
+            // 依照手机号进行查询
+            LoginVO vo = doctorMapper.selectDoctorByPhone(loginByPhoneDTO);
+            if(vo != null){
+                // 获取当前时间
+                LocalDateTime now = LocalDateTime.now();
+                // 将现在时间存入返回VO中
+                vo.setLast_login(now);
+                // 将lastLogin存入数据库中
+                doctorMapper.updateLastLogin(vo);
+                return vo;
+            }else {
+                return null;
+            }
+        }else {
+            return null;
+        }
+
     }
 
     /**

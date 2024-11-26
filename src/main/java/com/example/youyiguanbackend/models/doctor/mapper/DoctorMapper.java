@@ -1,9 +1,7 @@
 package com.example.youyiguanbackend.models.doctor.mapper;
 
 import com.example.youyiguanbackend.models.doctor.model.dto.LoginDTO;
-import com.example.youyiguanbackend.models.doctor.model.pojo.Doctor;
-import com.example.youyiguanbackend.models.doctor.model.pojo.LoginVO;
-import com.example.youyiguanbackend.models.doctor.model.pojo.SelectDoctorUserNameAndEmailVO;
+import com.example.youyiguanbackend.models.doctor.model.pojo.*;
 import org.apache.ibatis.annotations.Mapper;
 
 import java.time.LocalDateTime;
@@ -23,4 +21,10 @@ public interface DoctorMapper {
     LoginVO selectDoctorByUsernameAndEmail(LoginDTO loginDTO);
 
     void updateLastLogin(LoginVO loginVO);
+
+    LoginVO selectDoctorByFaceAndUsername(LoginByFaceVO vo);
+
+    LoginVO selectDoctorByPhone(LoginByPhoneDTO loginByPhoneDTO);
+
+    Doctor selectFaceToken(String faceToken);
 }

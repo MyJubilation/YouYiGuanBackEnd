@@ -1,7 +1,9 @@
 package com.example.youyiguanbackend.models.doctor.service;
 
+import com.example.youyiguanbackend.models.doctor.model.dto.LoginByFaceDTO;
 import com.example.youyiguanbackend.models.doctor.model.dto.LoginDTO;
 import com.example.youyiguanbackend.models.doctor.model.dto.RegisterDTO;
+import com.example.youyiguanbackend.models.doctor.model.pojo.LoginByPhoneDTO;
 import com.example.youyiguanbackend.models.doctor.model.pojo.LoginVO;
 import com.example.youyiguanbackend.models.doctor.model.pojo.RegisterVO;
 
@@ -23,4 +25,8 @@ public interface DoctorService {
     RegisterVO register(RegisterDTO registerDTO);
 
     LoginVO loginByUsername(LoginDTO loginDTO);
+
+    LoginVO loginByFace(LoginByFaceDTO loginByFaceDTO);
+
+    LoginVO loginByPhone(LoginByPhoneDTO loginByPhoneDTO);
 }

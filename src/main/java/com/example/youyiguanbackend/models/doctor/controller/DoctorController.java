@@ -2,8 +2,10 @@ package com.example.youyiguanbackend.models.doctor.controller;
 
 import com.example.youyiguanbackend.common.doctor.Result.Result;
 import com.example.youyiguanbackend.common.doctor.Util.ConstantUtil;
+import com.example.youyiguanbackend.models.doctor.model.dto.LoginByFaceDTO;
 import com.example.youyiguanbackend.models.doctor.model.dto.LoginDTO;
 import com.example.youyiguanbackend.models.doctor.model.dto.RegisterDTO;
+import com.example.youyiguanbackend.models.doctor.model.pojo.LoginByPhoneDTO;
 import com.example.youyiguanbackend.models.doctor.model.pojo.LoginVO;
 import com.example.youyiguanbackend.models.doctor.model.pojo.RegisterVO;
 import com.example.youyiguanbackend.models.doctor.service.DoctorService;
@@ -105,6 +107,41 @@ public class DoctorController {
             return Result.success().code(200).data(loginVO).message("登录成功");
         }else {
             return Result.error(401,"用户名或密码错误");
+        }
+    }
+
+    @PostMapping("/login/face")
+    /**
+     * 人脸识别登录
+     */
+    public Result<?> loginByFace(@RequestBody LoginByFaceDTO loginByFaceDTO) {
+        LoginVO vo = doctorService.loginByFace(loginByFaceDTO);
+        if(vo != null){
+            return Result.success().code(200).message("登录成功").data(vo);
+        }else {
+            return Result.error(401,"人脸识别失败");
+        }
+    }
+
+    @PostMapping("/login/sendCode/{contact_number}")
+    /**
+     * 手机号验证登录--发送验证码
+     */
+    public Result<?> sendCode(@PathVariable String contact_number) {
+        if(doctorService.sendCode(contact_number)){
+            return Result.success().code(200).message("验证码已发送");
+        }else {
+            return Result.error(401,"手机号未注册");
+        }
+    }
+
+    @PostMapping("/login/phone")
+    public Result<?> loginByPhone(@RequestBody LoginByPhoneDTO loginByPhoneDTO) {
+        LoginVO vo = doctorService.loginByPhone(loginByPhoneDTO);
+        if(vo != null){
+            return Result.success().code(200).message("登录成功").data(vo);
+        }else {
+            return Result.error(401,"验证码错误");
         }
     }
 
