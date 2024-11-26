@@ -2,7 +2,9 @@ package com.example.youyiguanbackend.models.doctor.controller;
 
 import com.example.youyiguanbackend.common.doctor.Result.Result;
 import com.example.youyiguanbackend.common.doctor.Util.ConstantUtil;
+import com.example.youyiguanbackend.models.doctor.model.dto.LoginDTO;
 import com.example.youyiguanbackend.models.doctor.model.dto.RegisterDTO;
+import com.example.youyiguanbackend.models.doctor.model.pojo.LoginVO;
 import com.example.youyiguanbackend.models.doctor.model.pojo.RegisterVO;
 import com.example.youyiguanbackend.models.doctor.service.DoctorService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -86,6 +88,23 @@ public class DoctorController {
             return Result.success().code(200).message("注册成功").data(registerVO);
         }else {
             return Result.error(401,"注册失败，请检查输入信息");
+        }
+    }
+
+    @PostMapping("/login")
+    /**
+     * 医生用户名密码登录
+     */
+    public Result<?> loginByUsername(@RequestBody LoginDTO loginDTO) {
+        // 登录操作，返回LoginVO数据类型
+        LoginVO loginVO = doctorService.loginByUsername(loginDTO);
+        // jwt封装
+        // 返回值，将jwt和LoginVO给put到Result中
+        // test
+        if(loginVO != null){
+            return Result.success().code(200).data(loginVO).message("登录成功");
+        }else {
+            return Result.error(401,"用户名或密码错误");
         }
     }
 

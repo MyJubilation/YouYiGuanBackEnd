@@ -40,4 +40,23 @@ VALUES
        OR email = #{email}
 </select>
 
+<select id="selectDoctorByUsernameAndEmail" resultType="com.example.youyiguanbackend.models.doctor.model.pojo.LoginVO">
+
+    SELECT
+        *
+    FROM
+        doctor
+    WHERE
+        username = #{username}
+    AND
+        password = #{password}
+</select>
+
+    <update id="updateLastLogin">
+        UPDATE doctor
+        SET last_login = #{last_login}
+        WHERE
+            username = #{name}
+    </update>
+
 </mapper>

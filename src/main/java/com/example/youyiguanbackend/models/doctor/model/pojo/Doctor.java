@@ -4,6 +4,7 @@ import com.example.youyiguanbackend.models.doctor.model.dto.Enum.Department;
 import com.example.youyiguanbackend.models.doctor.model.dto.Enum.ExperienceLevel;
 import com.example.youyiguanbackend.models.doctor.model.dto.Enum.Gender;
 import com.example.youyiguanbackend.models.doctor.model.dto.Enum.Status;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Data;
 
 import java.sql.Blob;
@@ -29,7 +30,9 @@ public class Doctor {
     private String password;
     private String faceRecognitionData ;   // 医生的面部识别数据
     private Status status;   // 医生账户的状态，”激活“表示账户已启用，'未激活'表示账户未启用
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime accountCreationDate;   // 用户创建时间
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime lastLogin;  // 最后一次登录时间
     private int permissionLevel;  // 医生权限级别
     private int aiDiagnosisReviewEnabled;  // 是否启用ai诊断审核功能

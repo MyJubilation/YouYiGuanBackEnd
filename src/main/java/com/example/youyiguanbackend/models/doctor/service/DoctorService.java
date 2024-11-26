@@ -1,6 +1,8 @@
 package com.example.youyiguanbackend.models.doctor.service;
 
+import com.example.youyiguanbackend.models.doctor.model.dto.LoginDTO;
 import com.example.youyiguanbackend.models.doctor.model.dto.RegisterDTO;
+import com.example.youyiguanbackend.models.doctor.model.pojo.LoginVO;
 import com.example.youyiguanbackend.models.doctor.model.pojo.RegisterVO;
 
 import java.io.IOException;
@@ -19,4 +21,6 @@ public interface DoctorService {
     int validateFace(String base64String) throws IOException;
 
     RegisterVO register(RegisterDTO registerDTO);
+
+    LoginVO loginByUsername(LoginDTO loginDTO);
 }

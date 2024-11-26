@@ -9,8 +9,10 @@ import com.example.youyiguanbackend.models.doctor.model.dto.Enum.Department;
 import com.example.youyiguanbackend.models.doctor.model.dto.Enum.ExperienceLevel;
 import com.example.youyiguanbackend.models.doctor.model.dto.Enum.Gender;
 import com.example.youyiguanbackend.models.doctor.model.dto.Enum.Status;
+import com.example.youyiguanbackend.models.doctor.model.dto.LoginDTO;
 import com.example.youyiguanbackend.models.doctor.model.dto.RegisterDTO;
 import com.example.youyiguanbackend.models.doctor.model.pojo.Doctor;
+import com.example.youyiguanbackend.models.doctor.model.pojo.LoginVO;
 import com.example.youyiguanbackend.models.doctor.model.pojo.RegisterVO;
 import com.example.youyiguanbackend.models.doctor.service.DoctorService;
 import com.google.code.kaptcha.impl.DefaultKaptcha;
@@ -25,6 +27,7 @@ import org.json.JSONObject;
 import java.io.*;
 
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
@@ -104,7 +107,7 @@ public class DoctorServiceImpl implements DoctorService {
 
             String result = HttpUtil.post(url, accessToken, "application/json", param);
             System.out.println(result);
-            // 判断result中error_code的值，如果为0则表示成功，其他则失败  TODO 222203为人脸图像已经录入
+            // 判断result中error_code的值，如果为0则表示成功，其他则失败  222203为人脸图像已经录入
             // 使用JSONObject解析字符串
             JSONObject responseJson = new JSONObject(result);
             // 获取error_code的值
@@ -192,6 +195,29 @@ public class DoctorServiceImpl implements DoctorService {
         stringRedisTemplate.delete("faceToken");
         //  返回逻辑实现
         return registerVO;
+    }
+
+    /**
+     * 医生用户名密码登录
+     */
+    @Override
+    public LoginVO loginByUsername(LoginDTO loginDTO) {
+        LoginVO vo = doctorMapper.selectDoctorByUsernameAndEmail(loginDTO);
+        if(vo != null){
+            // 获取当前时间
+            LocalDateTime now = LocalDateTime.now();
+            // // 创建一个DateTimeFormatter对象，指定要格式化的样式
+            // DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+            // // 使用formatter格式化LocalDateTime对象
+            // String formattedDate = now.format(formatter);
+            // 将现在时间存入返回VO中
+            vo.setLast_login(now);
+            // 将lastLogin存入数据库中
+            doctorMapper.updateLastLogin(vo);
+            return vo;
+        }else {
+            return null;
+        }
     }
 
     /**
