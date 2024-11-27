@@ -2,10 +2,12 @@ package com.example.youyiguanbackend.models.doctor.controller;
 
 import com.example.youyiguanbackend.common.doctor.Result.Result;
 import com.example.youyiguanbackend.common.doctor.Util.ConstantUtil;
+import com.example.youyiguanbackend.common.doctor.Util.JWTUtil;
 import com.example.youyiguanbackend.models.doctor.model.dto.LoginByFaceDTO;
 import com.example.youyiguanbackend.models.doctor.model.dto.LoginDTO;
 import com.example.youyiguanbackend.models.doctor.model.dto.RegisterDTO;
 import com.example.youyiguanbackend.models.doctor.model.pojo.LoginByPhoneDTO;
+import com.example.youyiguanbackend.models.doctor.model.pojo.LoginReturn;
 import com.example.youyiguanbackend.models.doctor.model.pojo.LoginVO;
 import com.example.youyiguanbackend.models.doctor.model.pojo.RegisterVO;
 import com.example.youyiguanbackend.models.doctor.service.DoctorService;
@@ -13,6 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.Map;
 
 
@@ -98,16 +101,31 @@ public class DoctorController {
      * 医生用户名密码登录
      */
     public Result<?> loginByUsername(@RequestBody LoginDTO loginDTO) {
-        // 登录操作，返回LoginVO数据类型
-        LoginVO loginVO = doctorService.loginByUsername(loginDTO);
         // jwt封装
-        // 返回值，将jwt和LoginVO给put到Result中
-        // test
-        if(loginVO != null){
-            return Result.success().code(200).data(loginVO).message("登录成功");
-        }else {
-            return Result.error(401,"用户名或密码错误");
+        Map<String,Object> map = new HashMap<>();
+        try{
+            // 登录操作，返回LoginVO数据类型
+            LoginVO loginVO = doctorService.loginByUsername(loginDTO);
+            if(loginVO != null){
+                // 返回值，将jwt和LoginVO给put到Result中
+                Map<String,String> payload = new HashMap<>();
+                payload.put("name",loginVO.getName());
+                payload.put("department",loginVO.getDepartment());
+                //生成JWT令牌
+                String token = JWTUtil.getToken(payload);
+                // 将token封装到VO中
+                LoginReturn loginReturn = new LoginReturn();
+                loginReturn.setToken(token);
+                loginReturn.setDoctor_info(loginVO);
+                return Result.success().code(200).data(loginReturn).message("登录成功");
+            }else {
+                return Result.error(401,"用户名或密码错误");
+            }
+        } catch (Exception e) {
+            return Result.error(404, e.getMessage());
         }
+
+
     }
 
     @PostMapping("/login/face")
@@ -115,11 +133,28 @@ public class DoctorController {
      * 人脸识别登录
      */
     public Result<?> loginByFace(@RequestBody LoginByFaceDTO loginByFaceDTO) {
-        LoginVO vo = doctorService.loginByFace(loginByFaceDTO);
-        if(vo != null){
-            return Result.success().code(200).message("登录成功").data(vo);
-        }else {
-            return Result.error(401,"人脸识别失败");
+        // jwt封装
+        Map<String,Object> map = new HashMap<>();
+        try{
+            // 登录操作，返回LoginVO数据类型
+            LoginVO vo = doctorService.loginByFace(loginByFaceDTO);
+            if(vo != null){
+                // 返回值，将jwt和LoginVO给put到Result中
+                Map<String,String> payload = new HashMap<>();
+                payload.put("name",vo.getName());
+                payload.put("department",vo.getDepartment());
+                //生成JWT令牌
+                String token = JWTUtil.getToken(payload);
+                // 将token封装到VO中
+                LoginReturn loginReturn = new LoginReturn();
+                loginReturn.setToken(token);
+                loginReturn.setDoctor_info(vo);
+                return Result.success().code(200).message("登录成功").data(loginReturn);
+            }else {
+                return Result.error(401,"人脸识别失败");
+            }
+        } catch (Exception e) {
+            return Result.error(404, e.getMessage());
         }
     }
 
@@ -136,13 +171,36 @@ public class DoctorController {
     }
 
     @PostMapping("/login/phone")
+    /**
+     * 手机号验证登录--验证验证码和手机号
+     */
     public Result<?> loginByPhone(@RequestBody LoginByPhoneDTO loginByPhoneDTO) {
-        LoginVO vo = doctorService.loginByPhone(loginByPhoneDTO);
-        if(vo != null){
-            return Result.success().code(200).message("登录成功").data(vo);
-        }else {
-            return Result.error(401,"验证码错误");
+        // jwt封装
+        Map<String,Object> map = new HashMap<>();
+        try{
+            // 登录操作，返回LoginVO数据类型
+            LoginVO vo = doctorService.loginByPhone(loginByPhoneDTO);
+            if(vo != null){
+                // 返回值，将jwt和LoginVO给put到Result中
+                Map<String,String> payload = new HashMap<>();
+                payload.put("name",vo.getName());
+                payload.put("department",vo.getDepartment());
+                //生成JWT令牌
+                String token = JWTUtil.getToken(payload);
+                // 将token封装到VO中
+                LoginReturn loginReturn = new LoginReturn();
+                loginReturn.setToken(token);
+                loginReturn.setDoctor_info(vo);
+                return Result.success().code(200).message("登录成功").data(loginReturn);
+            }else {
+                return Result.error(401,"验证码错误");
+            }
+        } catch (Exception e) {
+            return Result.error(404, e.getMessage());
         }
+
     }
+
+
 
 }
