@@ -1,5 +1,6 @@
 package com.example.youyiguanbackend.models.doctor.mapper;
 
+import com.example.youyiguanbackend.models.doctor.model.dto.DoctorUpdateDTO;
 import com.example.youyiguanbackend.models.doctor.model.dto.LoginDTO;
 import com.example.youyiguanbackend.models.doctor.model.pojo.*;
 import org.apache.ibatis.annotations.Mapper;
@@ -18,7 +19,7 @@ public interface DoctorMapper {
     // 用于判断唯一值 用户名（username） 和 邮箱（email） 是否存在
     SelectDoctorUserNameAndEmailVO selectDoctorUserNameAndEmail(Doctor doctor);
 
-    LoginVO selectDoctorByUsernameAndEmail(LoginDTO loginDTO);
+    LoginVO selectDoctorByUsernameAndPassword(String username,String password);
 
     void updateLastLogin(LoginVO loginVO);
 
@@ -33,4 +34,10 @@ public interface DoctorMapper {
     JWTVO selectJwtVO(String username);
 
     JWTVO selectJwtVOByPhone(String contactNumber);
+
+    boolean updateDoctorInfo(DoctorUpdateVO updateVO);
+
+    String selectDoctorByContactPhone(String contact_number);
+
+    boolean updateDoctorPassword(String username, String password);
 }

@@ -1,5 +1,6 @@
 package com.example.youyiguanbackend.models.doctor.service;
 
+import com.example.youyiguanbackend.models.doctor.model.dto.DoctorUpdateDTO;
 import com.example.youyiguanbackend.models.doctor.model.dto.LoginByFaceDTO;
 import com.example.youyiguanbackend.models.doctor.model.dto.LoginDTO;
 import com.example.youyiguanbackend.models.doctor.model.dto.RegisterDTO;
@@ -33,4 +34,10 @@ public interface DoctorService {
     JWTVO selectJwtVO(String username);
 
     JWTVO selectJwtVOByPhone(String contactNumber);
+
+    boolean updateDoctorInfo(DoctorUpdateDTO updateDTO,String authorizationHeader) throws IOException;
+
+    boolean selectDoctorByUsernameAndPassword(String currentPassword, String token) throws IOException;
+
+    boolean updateDoctorPassword(String newPassword, String token) throws IOException;
 }

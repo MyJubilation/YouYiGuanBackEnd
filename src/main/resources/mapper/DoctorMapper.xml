@@ -40,7 +40,7 @@ VALUES
        OR email = #{email}
 </select>
 
-<select id="selectDoctorByUsernameAndEmail" resultType="com.example.youyiguanbackend.models.doctor.model.pojo.LoginVO">
+<select id="selectDoctorByUsernameAndPassword" resultType="com.example.youyiguanbackend.models.doctor.model.pojo.LoginVO">
 
     SELECT
         *
@@ -57,6 +57,27 @@ VALUES
         SET last_login = #{last_login}
         WHERE
             username = #{name}
+    </update>
+    <update id="updateDoctorInfo">
+        UPDATE doctor
+        SET
+            name = #{name},
+            gender = #{gender.description},
+            age = #{age},
+            experience_level = #{experience_level.description},
+            hospital_name = #{hospital_name},
+            department = #{department.description},
+            contact_number = #{contact_number},
+            email = #{email}
+        WHERE
+            username = #{username}
+    </update>
+    <update id="updateDoctorPassword">
+        UPDATE doctor
+        SET
+            password = #{password}
+        WHERE
+            username = #{username}
     </update>
 
     <select id="selectDoctorByFaceAndUsername" resultType="com.example.youyiguanbackend.models.doctor.model.pojo.LoginVO">
@@ -100,6 +121,13 @@ VALUES
     </select>
     <select id="selectJwtVOByPhone" resultType="com.example.youyiguanbackend.models.doctor.model.pojo.JWTVO">
         SELECT *
+        FROM
+            doctor
+        WHERE
+            contact_number = #{contact_number}
+    </select>
+    <select id="selectDoctorByContactPhone" resultType="java.lang.String">
+        SELECT username
         FROM
             doctor
         WHERE

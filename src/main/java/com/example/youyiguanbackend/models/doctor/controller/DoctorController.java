@@ -3,9 +3,7 @@ package com.example.youyiguanbackend.models.doctor.controller;
 import com.example.youyiguanbackend.common.doctor.Result.Result;
 import com.example.youyiguanbackend.common.doctor.Util.ConstantUtil;
 import com.example.youyiguanbackend.common.doctor.Util.JWTUtil;
-import com.example.youyiguanbackend.models.doctor.model.dto.LoginByFaceDTO;
-import com.example.youyiguanbackend.models.doctor.model.dto.LoginDTO;
-import com.example.youyiguanbackend.models.doctor.model.dto.RegisterDTO;
+import com.example.youyiguanbackend.models.doctor.model.dto.*;
 import com.example.youyiguanbackend.models.doctor.model.pojo.*;
 import com.example.youyiguanbackend.models.doctor.service.DoctorService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -217,6 +215,41 @@ public class DoctorController {
             return Result.success().code(200).message("获取成功").data(vo);
         }else {
             return Result.error(401,"用户未登录或Token无效");
+        }
+    }
+
+    @PutMapping("/profile")
+    /**
+     * 修改医生个人信息
+     */
+    public Result<?> updateDoctorInfo(@RequestBody DoctorUpdateDTO updateDTO,@RequestHeader("Authorization") String authorizationHeader) throws IOException {
+        // 获取token值，存储为String类型
+        String token = authorizationHeader.substring(7);
+        if(doctorService.updateDoctorInfo(updateDTO,token)){
+            return Result.success().code(200).message("信息更新成功");
+        }else {
+            return Result.error(401,"信息更新失败，请检查提交数据");
+        }
+    }
+
+    @PutMapping("/password")
+    /**
+     * 修改医生密码
+     */
+    public Result<?> updatePassword(@RequestBody DoctorPasswordUpdateDTO doctorPasswordUpdateDTO,@RequestHeader("Authorization") String authorizationHeader) throws IOException {
+        // 获取token值，存储为String类型
+        String token = authorizationHeader.substring(7);
+        // 验证密码是否正确
+        if(doctorService.selectDoctorByUsernameAndPassword(doctorPasswordUpdateDTO.getCurrent_password(),token)){
+            // 设置新密码
+            if(doctorService.updateDoctorPassword(doctorPasswordUpdateDTO.getNew_password(),token)){
+                return Result.success().code(200).message("密码修改成功，请重新登录");
+            }else {
+                return Result.error(402,"设置新密码失败，请重试！");
+            }
+        }else {
+            // 密码不正确
+            return Result.error(401,"当前密码错误");
         }
     }
 

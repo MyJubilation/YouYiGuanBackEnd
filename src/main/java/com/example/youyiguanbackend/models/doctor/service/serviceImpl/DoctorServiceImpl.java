@@ -5,6 +5,7 @@ import com.example.youyiguanbackend.common.doctor.Util.GsonUtils;
 import com.example.youyiguanbackend.common.doctor.Util.HttpUtil;
 import com.example.youyiguanbackend.common.doctor.common.BaseContext;
 import com.example.youyiguanbackend.models.doctor.mapper.DoctorMapper;
+import com.example.youyiguanbackend.models.doctor.model.dto.DoctorUpdateDTO;
 import com.example.youyiguanbackend.models.doctor.model.dto.Enum.Department;
 import com.example.youyiguanbackend.models.doctor.model.dto.Enum.ExperienceLevel;
 import com.example.youyiguanbackend.models.doctor.model.dto.Enum.Gender;
@@ -267,7 +268,7 @@ public class DoctorServiceImpl implements DoctorService {
      */
     @Override
     public LoginVO loginByUsername(LoginDTO loginDTO) {
-        LoginVO vo = doctorMapper.selectDoctorByUsernameAndEmail(loginDTO);
+        LoginVO vo = doctorMapper.selectDoctorByUsernameAndPassword(loginDTO.getUsername(),loginDTO.getPassword());
         if(vo != null){
             // 获取当前时间
             LocalDateTime now = LocalDateTime.now();
@@ -403,6 +404,67 @@ public class DoctorServiceImpl implements DoctorService {
         }else {
             return null;
         }
+    }
+
+    /**
+     * 医生个人信息修改
+     */
+    @Override
+    public boolean updateDoctorInfo(DoctorUpdateDTO updateDTO,String token) throws IOException {
+        // 解析token中的username
+        String username = getUserNameByToken(token);
+        // 判断传回数据中的contact_phone是否为已经存在的值
+        String updateUsername = doctorMapper.selectDoctorByContactPhone(updateDTO.getContact_number());
+        if(updateUsername != username && updateUsername != null){
+            return false;
+        }
+        //将值赋给VO
+        DoctorUpdateVO updateVO = new DoctorUpdateVO();
+        updateVO.setUsername(username);
+        updateVO.setName(updateDTO.getName());
+        updateVO.setAge(updateDTO.getAge());
+        updateVO.setHospital_name(updateDTO.getHospital_name());
+        updateVO.setContact_number(updateDTO.getContact_number());
+        updateVO.setEmail(updateDTO.getEmail());
+        // 判断并传值
+        if(updateDTO.getGender().equals("男")){
+            updateVO.setGender(Gender.MAN);
+        }else if(updateDTO.getGender().equals("女")){
+            updateVO.setGender(Gender.WOMAN);
+        }else {
+            return false;
+        }
+        for(ExperienceLevel e : ExperienceLevel.values()){
+            if(e.getDescription().toString().equals(updateDTO.getExperience_level())){
+                updateVO.setExperience_level(e);
+            }
+        }
+        for(Department d : Department.values()){
+            if(d.getDescription().toString().equals(updateDTO.getDepartment())){
+                updateVO.setDepartment(d);
+            }
+        }
+        // 如果有任何值错误，则返回false
+        if(updateVO.getExperience_level() == null || updateVO.getDepartment() == null){
+            return false;
+        }
+        return doctorMapper.updateDoctorInfo(updateVO);
+    }
+
+    /**
+     * 验证旧密码是否正确并设置新密码
+     */
+    @Override
+    public boolean selectDoctorByUsernameAndPassword(String currentPassword, String token) throws IOException {
+        // 解析token中的username
+        String username = getUserNameByToken(token);
+        return doctorMapper.selectDoctorByUsernameAndPassword(username, currentPassword) != null;
+    }
+    @Override
+    public boolean updateDoctorPassword(String password, String token) throws IOException {
+        // 解析token中的username
+        String username = getUserNameByToken(token);
+        return doctorMapper.updateDoctorPassword(username,password);
     }
 
     /**
