@@ -83,5 +83,27 @@ VALUES
         WHERE
             face_token = #{faceToken}
     </select>
+    <select id="selectDoctorInfoByUsernameAndDepartment"
+            resultType="com.example.youyiguanbackend.models.doctor.model.pojo.DoctorInfoVO">
+        SELECT *
+        FROM
+            doctor
+        WHERE
+            username = #{username}
+    </select>
+    <select id="selectJwtVO" resultType="com.example.youyiguanbackend.models.doctor.model.pojo.JWTVO">
+        SELECT *
+        FROM
+            doctor
+        WHERE
+            username = #{username}
+    </select>
+    <select id="selectJwtVOByPhone" resultType="com.example.youyiguanbackend.models.doctor.model.pojo.JWTVO">
+        SELECT *
+        FROM
+            doctor
+        WHERE
+            contact_number = #{contact_number}
+    </select>
 
 </mapper>

@@ -6,10 +6,7 @@ import com.example.youyiguanbackend.common.doctor.Util.JWTUtil;
 import com.example.youyiguanbackend.models.doctor.model.dto.LoginByFaceDTO;
 import com.example.youyiguanbackend.models.doctor.model.dto.LoginDTO;
 import com.example.youyiguanbackend.models.doctor.model.dto.RegisterDTO;
-import com.example.youyiguanbackend.models.doctor.model.pojo.LoginByPhoneDTO;
-import com.example.youyiguanbackend.models.doctor.model.pojo.LoginReturn;
-import com.example.youyiguanbackend.models.doctor.model.pojo.LoginVO;
-import com.example.youyiguanbackend.models.doctor.model.pojo.RegisterVO;
+import com.example.youyiguanbackend.models.doctor.model.pojo.*;
 import com.example.youyiguanbackend.models.doctor.service.DoctorService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -106,10 +103,12 @@ public class DoctorController {
         try{
             // 登录操作，返回LoginVO数据类型
             LoginVO loginVO = doctorService.loginByUsername(loginDTO);
+            JWTVO jwtVO = doctorService.selectJwtVO(loginDTO.getUsername());
             if(loginVO != null){
                 // 返回值，将jwt和LoginVO给put到Result中
                 Map<String,String> payload = new HashMap<>();
                 payload.put("name",loginVO.getName());
+                payload.put("username",jwtVO.getUsername());
                 payload.put("department",loginVO.getDepartment());
                 //生成JWT令牌
                 String token = JWTUtil.getToken(payload);
@@ -138,10 +137,12 @@ public class DoctorController {
         try{
             // 登录操作，返回LoginVO数据类型
             LoginVO vo = doctorService.loginByFace(loginByFaceDTO);
+            JWTVO jwtVO = doctorService.selectJwtVO(loginByFaceDTO.getUsername());
             if(vo != null){
                 // 返回值，将jwt和LoginVO给put到Result中
                 Map<String,String> payload = new HashMap<>();
                 payload.put("name",vo.getName());
+                payload.put("username",jwtVO.getUsername());
                 payload.put("department",vo.getDepartment());
                 //生成JWT令牌
                 String token = JWTUtil.getToken(payload);
@@ -180,10 +181,12 @@ public class DoctorController {
         try{
             // 登录操作，返回LoginVO数据类型
             LoginVO vo = doctorService.loginByPhone(loginByPhoneDTO);
+            JWTVO jwtVO = doctorService.selectJwtVOByPhone(loginByPhoneDTO.getContact_number());
             if(vo != null){
                 // 返回值，将jwt和LoginVO给put到Result中
                 Map<String,String> payload = new HashMap<>();
                 payload.put("name",vo.getName());
+                payload.put("username",jwtVO.getUsername());
                 payload.put("department",vo.getDepartment());
                 //生成JWT令牌
                 String token = JWTUtil.getToken(payload);
@@ -201,6 +204,20 @@ public class DoctorController {
 
     }
 
-
+    @GetMapping("/profile")
+    /**
+     * 获取医生个人信息
+     */
+    public Result<?> getDoctorInfo(@RequestHeader("Authorization") String authorizationHeader) throws IOException {
+        if(authorizationHeader != null && authorizationHeader.startsWith("Bearer ")){
+            // 获取token值，存储为String类型
+            String token = authorizationHeader.substring(7);
+            // 传值到Service层处理
+            DoctorInfoVO vo = doctorService.selectDoctorInfoByToken(token);
+            return Result.success().code(200).message("获取成功").data(vo);
+        }else {
+            return Result.error(401,"用户未登录或Token无效");
+        }
+    }
 
 }

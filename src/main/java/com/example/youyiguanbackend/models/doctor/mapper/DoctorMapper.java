@@ -27,4 +27,10 @@ public interface DoctorMapper {
     LoginVO selectDoctorByPhone(LoginByPhoneDTO loginByPhoneDTO);
 
     Doctor selectFaceToken(String faceToken);
+
+    DoctorInfoVO selectDoctorInfoByUsernameAndDepartment(String username);
+
+    JWTVO selectJwtVO(String username);
+
+    JWTVO selectJwtVOByPhone(String contactNumber);
 }

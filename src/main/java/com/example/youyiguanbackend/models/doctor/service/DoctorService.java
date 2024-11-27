@@ -3,9 +3,7 @@ package com.example.youyiguanbackend.models.doctor.service;
 import com.example.youyiguanbackend.models.doctor.model.dto.LoginByFaceDTO;
 import com.example.youyiguanbackend.models.doctor.model.dto.LoginDTO;
 import com.example.youyiguanbackend.models.doctor.model.dto.RegisterDTO;
-import com.example.youyiguanbackend.models.doctor.model.pojo.LoginByPhoneDTO;
-import com.example.youyiguanbackend.models.doctor.model.pojo.LoginVO;
-import com.example.youyiguanbackend.models.doctor.model.pojo.RegisterVO;
+import com.example.youyiguanbackend.models.doctor.model.pojo.*;
 
 import java.io.IOException;
 
@@ -29,4 +27,10 @@ public interface DoctorService {
     LoginVO loginByFace(LoginByFaceDTO loginByFaceDTO);
 
     LoginVO loginByPhone(LoginByPhoneDTO loginByPhoneDTO);
+
+    DoctorInfoVO selectDoctorInfoByToken(String token) throws IOException;
+
+    JWTVO selectJwtVO(String username);
+
+    JWTVO selectJwtVOByPhone(String contactNumber);
 }
