@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.example.youyiguanbackend.models.doctor.mapper.PatientMapper">
+    <select id="getDoctorUsernameById" resultType="string">
+        SELECT username
+        FROM doctor
+        WHERE doctor_id = #{doctor_id}
+    </select>
+    <select id="getPatientList"
+            resultType="com.example.youyiguanbackend.models.doctor.model.pojo.PatientGetListVO">
+        SELECT
+            p.patient_id,
+            p.NAME,
+            p.gender,
+            p.age,
+            p.last_visit,
+            m.review_status,
+            m.patient_status,
+            pe.status
+        FROM
+            patient p,
+            patientappointment pe,
+            medicalrecord m
+        WHERE
+            m.doctor_id = #{doctor_id}
+          AND pe.doctor_id = #{doctor_id}
+          AND p.patient_id = m.patient_id
+          AND p.patient_id = pe.patient_id
+    </select>
+</mapper>

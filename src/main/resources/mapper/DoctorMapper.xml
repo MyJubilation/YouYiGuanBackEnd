@@ -133,5 +133,12 @@ VALUES
         WHERE
             contact_number = #{contact_number}
     </select>
+    <select id="selectDoctorPermission" resultType="java.lang.Integer">
+        SELECT permission_level
+        FROM
+            doctor
+        WHERE
+            username = #{username}
+    </select>
 
 </mapper>

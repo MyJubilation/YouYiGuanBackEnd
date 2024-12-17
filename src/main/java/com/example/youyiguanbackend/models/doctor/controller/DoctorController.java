@@ -6,6 +6,7 @@ import com.example.youyiguanbackend.common.doctor.Util.JWTUtil;
 import com.example.youyiguanbackend.models.doctor.model.dto.*;
 import com.example.youyiguanbackend.models.doctor.model.pojo.*;
 import com.example.youyiguanbackend.models.doctor.service.DoctorService;
+import com.google.gson.Gson;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -250,6 +251,27 @@ public class DoctorController {
         }else {
             // 密码不正确
             return Result.error(401,"当前密码错误");
+        }
+    }
+
+    /**
+     * TODO 更新人脸数据
+     */
+
+    @GetMapping("/permissions")
+    /**
+     * 获取医生权限
+     */
+    public Result<?> getDoctorPermissions(@RequestHeader("Authorization") String authorizationHeader) throws IOException {
+        // 获取token值，存储为String类型
+        String token = authorizationHeader.substring(7);
+        int permission_level = doctorService.selectDoctorPermission(token);
+        if(permission_level == ConstantUtil.PERMISSIONLEVEL_ERROR){
+            return Result.error(401,"权限获取失败");
+        }else {
+            DoctorPermissionVO vo = new DoctorPermissionVO();
+            vo.setPermission_level(permission_level);
+            return Result.success().code(200).message("权限获取成功").data(vo);
         }
     }
 

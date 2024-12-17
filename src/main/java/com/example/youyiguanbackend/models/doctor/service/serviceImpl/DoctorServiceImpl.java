@@ -468,6 +468,18 @@ public class DoctorServiceImpl implements DoctorService {
     }
 
     /**
+     * 获取医生权限值
+     */
+    @Override
+    public int selectDoctorPermission(String token) throws IOException {
+        // 解析token中的username
+        String username = getUserNameByToken(token);
+        // 获取医生权限值，失败则返回PERMISSION_ERROR常量
+        // 权限值默认为1，不可能位空
+        return doctorMapper.selectDoctorPermission(username);
+    }
+
+    /**
      * 从用户的AK，SK生成鉴权签名（Access Token）
      * @return 鉴权签名（Access Token）
      * @throws IOException IO异常

@@ -40,4 +40,6 @@ public interface DoctorService {
     boolean selectDoctorByUsernameAndPassword(String currentPassword, String token) throws IOException;
 
     boolean updateDoctorPassword(String newPassword, String token) throws IOException;
+
+    int selectDoctorPermission(String token) throws IOException;
 }

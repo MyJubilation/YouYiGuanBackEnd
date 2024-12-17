@@ -40,4 +40,6 @@ public interface DoctorMapper {
     String selectDoctorByContactPhone(String contact_number);
 
     boolean updateDoctorPassword(String username, String password);
+
+    int selectDoctorPermission(String username);
 }
