@@ -2,6 +2,7 @@ package com.example.youyiguanbackend.models.doctor.service;
 
 import com.example.youyiguanbackend.models.doctor.model.dto.PatientGetListDTO;
 import com.example.youyiguanbackend.models.doctor.model.pojo.PatientGetListVO;
+import com.example.youyiguanbackend.models.doctor.model.pojo.PatientInfo;
 
 import java.io.IOException;
 import java.util.List;
@@ -13,4 +14,6 @@ import java.util.List;
  */
 public interface PatientService {
     List<PatientGetListVO> getPatientList(PatientGetListDTO dto) throws IOException;
+
+    PatientInfo getPatientInfo(int doctorId, int patientId);
 }

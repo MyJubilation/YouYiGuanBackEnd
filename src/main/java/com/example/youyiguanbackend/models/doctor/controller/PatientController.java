@@ -3,6 +3,7 @@ package com.example.youyiguanbackend.models.doctor.controller;
 import com.example.youyiguanbackend.common.doctor.Result.Result;
 import com.example.youyiguanbackend.models.doctor.model.dto.PatientGetListDTO;
 import com.example.youyiguanbackend.models.doctor.model.pojo.PatientGetListVO;
+import com.example.youyiguanbackend.models.doctor.model.pojo.PatientInfo;
 import com.example.youyiguanbackend.models.doctor.service.PatientService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -48,6 +49,20 @@ public class PatientController {
             return Result.success(result);
         }else {
             return Result.error(401,"获取失败，请检查输入条件");
+        }
+    }
+    /**
+     * 病人详细信息
+     */
+    @GetMapping("/detail")
+    public Result<?> getPatientInfo(@RequestHeader("Authorization") String authorizationHeader,
+                                    @RequestParam(value = "doctor_id") int doctor_id,
+                                    @RequestParam(value = "patient_id") int patient_id) throws IOException {
+        PatientInfo result = patientService.getPatientInfo(doctor_id,patient_id);
+        if(result!=null){
+            return Result.success(result);
+        }else {
+            return Result.error(1001,"获取失败，参数错误");
         }
     }
 }

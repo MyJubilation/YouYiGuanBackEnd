@@ -2,7 +2,9 @@ package com.example.youyiguanbackend.models.doctor.service.serviceImpl;
 
 import com.example.youyiguanbackend.models.doctor.mapper.PatientMapper;
 import com.example.youyiguanbackend.models.doctor.model.dto.PatientGetListDTO;
+import com.example.youyiguanbackend.models.doctor.model.pojo.MedicalRecords;
 import com.example.youyiguanbackend.models.doctor.model.pojo.PatientGetListVO;
+import com.example.youyiguanbackend.models.doctor.model.pojo.PatientInfo;
 import com.example.youyiguanbackend.models.doctor.service.PatientService;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -42,6 +44,16 @@ public class PatientServiceImpl implements PatientService {
         }
     }
 
+    @Override
+    public PatientInfo getPatientInfo(int doctor_id, int patient_id) {
+        // // 查询药方记录
+        // List<MedicalRecords> medicalRecords = patientMapper.getMedicalRecords(patient_id,doctor_id);
+        // 查询patient
+        PatientInfo patientInfo = patientMapper.getPatientInfo(patient_id);
+        // // 将记录存入patient
+        // patientInfo.setMedical_records(medicalRecords);
+        return patientInfo;
+    }
 
     /**
      * 从token中解析并获取username

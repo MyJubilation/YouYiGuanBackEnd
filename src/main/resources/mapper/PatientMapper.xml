@@ -2,13 +2,26 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
 <mapper namespace="com.example.youyiguanbackend.models.doctor.mapper.PatientMapper">
+
+    <resultMap id="PatientGetListVOResultMap" type="com.example.youyiguanbackend.models.doctor.model.pojo.PatientGetListVO">
+        <id property="patient_id" column="patient_id"/>
+        <result property="name" column="name"/>
+        <result property="gender" column="gender"/>
+        <result property="age" column="age"/>
+        <result property="last_visit" column="last_visit"/>
+        <result property="review_status" column="review_status"/>
+        <result property="patient_status" column="patient_status"/>
+        <!-- 映射数据库中的status列到appointment_status属性 -->
+        <result property="appointment_status" column="status"/>
+    </resultMap>
+
     <select id="getDoctorUsernameById" resultType="string">
         SELECT username
         FROM doctor
         WHERE doctor_id = #{doctor_id}
     </select>
     <select id="getPatientList"
-            resultType="com.example.youyiguanbackend.models.doctor.model.pojo.PatientGetListVO">
+            resultMap="PatientGetListVOResultMap">
         SELECT
             p.patient_id,
             p.NAME,
@@ -27,5 +40,22 @@
           AND pe.doctor_id = #{doctor_id}
           AND p.patient_id = m.patient_id
           AND p.patient_id = pe.patient_id
+          AND p.name LIKE CONCAT('%',#{search},'%')
+    </select>
+    <select id="getMedicalRecords"
+            resultType="com.example.youyiguanbackend.models.doctor.model.pojo.MedicalRecords">
+        SELECT *
+        FROM
+            medicalrecord
+        WHERE
+            doctor_id = #{doctor_id}
+          AND patient_id = #{patient_id}
+    </select>
+    <select id="getPatientInfo" resultType="com.example.youyiguanbackend.models.doctor.model.pojo.PatientInfo">
+        SELECT *
+        FROM
+            patient
+        WHERE
+            patient_id = #{patient_id}
     </select>
 </mapper>
