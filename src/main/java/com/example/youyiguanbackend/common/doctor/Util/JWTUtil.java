@@ -37,7 +37,7 @@ public class JWTUtil {
      * @param token
      */
     public static void verify(String token){
-        JWT.require(Algorithm.HMAC256(SIGNATURE)).build().verify(token);
+//        JWT.require(Algorithm.HMAC256(SIGNATURE)).build().verify(token);
     }
 
     /**

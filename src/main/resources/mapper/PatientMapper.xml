@@ -58,4 +58,25 @@
         WHERE
             patient_id = #{patient_id}
     </select>
+    <select id="getPatientInfoByPatientId"
+            resultType="com.example.youyiguanbackend.models.doctor.model.pojo.GetPatientInfoByPatientIdVO">
+        SELECT m.record_id,d.name,m.recipe_name,m.recipe_details,m.paozhi,m.diagnosis,m.review_status,m.patient_status,m.visit_date,m.remarks
+        FROM
+            doctor d,medicalrecord m
+        WHERE
+            d.doctor_id = m.doctor_id
+            AND patient_id = #{patientId}
+            <if test="reviewStatus != null">
+                AND review_status = #{reviewStatus}
+            </if>
+            <if test="patientStatus != null">
+                AND patient_status = #{patientStatus}
+            </if>
+            <if test="dateFrom != null">
+                AND visit_date >= #{dateFrom}
+            </if>
+            <if test="dateTo != null">
+                AND visit_date <![CDATA[ <= ]]> #{dateTo}
+            </if>
+    </select>
 </mapper>
