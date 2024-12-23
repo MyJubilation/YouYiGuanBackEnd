@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.example.youyiguanbackend.models.doctor.mapper.NotificationsMapper">
+    <update id="markReadById">
+        UPDATE notifications
+        SET
+            status = "已读"
+        WHERE
+            notification_id = #{notificationId}
+    </update>
+    <delete id="deleteById">
+        DELETE FROM notifications WHERE doctor_id = #{doctorId}
+    </delete>
+
+    <select id="getTotalCountByIdAndStatusAndPriority" resultType="java.lang.Integer">
+        SELECT COUNT(*)
+        FROM
+            notifications
+        <where>
+            doctor_id = #{doctor_id}
+        <if test="status != null">
+          AND  status = #{status}
+        </if>
+        <if test="priority != null">
+          AND  priority = #{priority}
+        </if>
+        </where>
+    </select>
+    <select id="getTotalListByIdAndStatusAndPriority"
+            resultType="com.example.youyiguanbackend.models.doctor.model.pojo.Notifications">
+        SELECT *
+        FROM
+            notifications
+        <where>
+            doctor_id = #{doctor_id}
+            <if test="status != null">
+                AND  status = #{status}
+            </if>
+            <if test="priority != null">
+                AND  priority = #{priority}
+            </if>
+        </where>
+        LIMIT #{page} , #{limit}
+    </select>
+</mapper>

@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.example.youyiguanbackend.models.doctor.mapper.RecipesMapper">
+    <insert id="addRecipes">
+        INSERT INTO customrecipe(doctor_id, recipe_name, ingredients, paozhi, usage_instructions)
+        VALUES (
+                #{doctor_id},
+                #{recipe_name},
+                #{ingredients},
+                #{paozhi},
+                #{usage_instructions}
+               )
+    </insert>
+    <update id="updateRecipes">
+        UPDATE customrecipe
+        <set>
+            <if test="updateRecipes.recipe_name != null">
+                recipe_name = #{updateRecipes.recipe_name},
+            </if>
+            <if test="updateRecipes.ingredients != null">
+                ingredients = #{updateRecipes.ingredients},
+            </if>
+            <if test="updateRecipes.paozhi != null">
+                paozhi = #{updateRecipes.paozhi},
+            </if>
+            <if test="updateRecipes.usage_instructions != null">
+                usage_instructions = #{updateRecipes.usage_instructions},
+            </if>
+        </set>
+        WHERE
+            custom_recipe_id = #{customRecipeId}
+    </update>
+    <delete id="deleteRecipes">
+        DELETE FROM customrecipe
+        WHERE
+            custom_recipe_id = #{customRecipeId}
+    </delete>
+
+    <select id="getRecipesList"
+            resultType="com.example.youyiguanbackend.models.doctor.model.pojo.GetRecipesListVO">
+        SELECT *
+        FROM
+            customrecipe
+        <where>
+            doctor_id = #{doctorId}
+            <if test="dateFrom != null">
+              AND  created_date >= #{dateFrom}
+            </if>
+            <if test="dateTo != null">
+              AND  created_date <![CDATA[ <= ]]> #{dateTo}
+            </if>
+        </where>
+    </select>
+    <select id="selectUpdateRecipes"
+            resultType="com.example.youyiguanbackend.models.doctor.model.pojo.UpdateRecipes">
+        SELECT *
+        FROM
+            customrecipe
+        WHERE
+            custom_recipe_id = #{customRecipeId}
+    </select>
+</mapper>

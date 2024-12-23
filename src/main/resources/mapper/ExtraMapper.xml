@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.example.youyiguanbackend.models.doctor.mapper.ExtraMapper">
+
+    <update id="setAppointment">
+        UPDATE patientappointment
+        SET status = '待诊断'
+        WHERE appointment_id = #{appointmentId}
+    </update>
+    <update id="diagnose">
+        UPDATE patient
+        SET
+            tongue_condition = #{tongue_condition},
+            pulse_condition = #{pulse_condition},
+            symptoms = {symptoms},
+            height = #{height},
+            weight = #{weight})
+        WHERE
+            patient_id = #{patient_id}
+    </update>
+    <update id="diagnosisUpdate">
+        UPDATE medicalrecord
+        <set>
+            <if test="symptoms != null">
+                symptoms = #{symptoms},
+            </if>
+            <if test="diagnosis != null">
+                diagnosis = #{diagnosis},
+            </if>
+            <if test="recipe_name != null">
+                recipe_name = #{recipe_name},
+            </if>
+            <if test="recipe_details != null">
+                recipe_details = #{recipe_details},
+            </if>
+            <if test="paozhi != null">
+                paozhi = #{paozhi},
+            </if>
+            <if test="remarks != null">
+                remarks = #{remarks},
+            </if>
+            <if test="patient_status != null">
+                patient_status = #{patient_status},
+            </if>
+            <if test="payment_status != null">
+                payment_status = #{payment_status},
+            </if>
+        </set>
+        WHERE
+            record_id = #{recordId}
+    </update>
+    <select id="getAppointment" resultType="com.example.youyiguanbackend.models.doctor.model.pojo.Appointment">
+        SELECT *
+        FROM
+            patientappointment
+        WHERE
+            appointment_id = #{appointmentId}
+    </select>
+    <select id="getMedicalRecord"
+            resultType="com.example.youyiguanbackend.models.doctor.model.pojo.MedicalRecord">
+        SELECT record_id, patient_id, doctor_id, recipe_name, diagnosis, review_status, visit_date
+        FROM
+            medicalrecord
+        WHERE
+            record_id = #{recordId}
+    </select>
+    <select id="selectByRecordIdAndUserNameAndReviewStatus" resultType="java.lang.Integer">
+        SELECT *
+        FROM
+            medicalrecord m,doctor d
+        WHERE
+            m.record_id = #{recordId}
+          AND d.username = #{username}
+          AND m.review_status = '待审核'
+    </select>
+    <select id="selectByRecordId"
+            resultType="com.example.youyiguanbackend.models.doctor.model.pojo.DiagnosisUpdateVO">
+        select *
+        FROM
+            medicalrecord
+        WHERE
+            record_id = #{recordId}
+    </select>
+    <insert id="getMedicalRecordId">
+        <selectKey keyProperty="record_id" resultType="int" order="AFTER">
+            SELECT LAST_INSERT_ID()
+        </selectKey>
+        INSERT INTO medicalrecord (patient_id, doctor_id, visit_date, review_status, patient_status, payment_status)
+        VALUES (
+                #{patient_id},
+                #{doctor_id},
+                #{visit_date},
+                #{review_status},
+                #{patient_status},
+                #{payment_status})
+    </insert>
+</mapper>
