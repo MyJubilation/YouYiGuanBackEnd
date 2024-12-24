@@ -15,4 +15,12 @@ public interface NotificationsMapper {
     int markReadById(int notificationId);
 
     int deleteById(int doctorId);
+
+    int getUnreadCountById(int doctorId);
+
+    int getMap1ById(int doctorId);
+
+    int getMap2ById(int doctorId);
+
+    int createNotifications(Notifications notifications);
 }

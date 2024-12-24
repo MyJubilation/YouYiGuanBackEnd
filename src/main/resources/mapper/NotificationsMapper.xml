@@ -2,6 +2,17 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
 <mapper namespace="com.example.youyiguanbackend.models.doctor.mapper.NotificationsMapper">
+    <insert id="createNotifications">
+        INSERT INTO notifications (doctor_id, message, notification_type, status, priority, remarks)
+        VALUES (
+                #{doctor_id},
+                #{msg},
+                #{notification_type},
+                #{status},
+                #{priority},
+                #{remarks}
+               )
+    </insert>
     <update id="markReadById">
         UPDATE notifications
         SET
@@ -42,5 +53,29 @@
             </if>
         </where>
         LIMIT #{page} , #{limit}
+    </select>
+    <select id="getUnreadCountById" resultType="java.lang.Integer">
+        SELECT COUNT(*)
+        FROM
+            notifications
+        WHERE
+            doctor_id = #{doctorId}
+          AND status = "未读"
+    </select>
+    <select id="getMap1ById" resultType="java.lang.Integer">
+        SELECT COUNT(*)
+        FROM
+            notifications
+        WHERE
+            doctor_id = #{doctorId}
+          AND notification_type = "待审核诊断"
+    </select>
+    <select id="getMap2ById" resultType="java.lang.Integer">
+        SELECT COUNT(*)
+        FROM
+            notifications
+        WHERE
+            doctor_id = #{doctorId}
+          AND notification_type = "排队病人提醒"
     </select>
 </mapper>

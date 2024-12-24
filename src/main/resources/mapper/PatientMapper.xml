@@ -35,12 +35,24 @@
             patient p,
             patientappointment pe,
             medicalrecord m
-        WHERE
+        <where>
             m.doctor_id = #{doctor_id}
-          AND pe.doctor_id = #{doctor_id}
-          AND p.patient_id = m.patient_id
-          AND p.patient_id = pe.patient_id
-          AND p.name LIKE CONCAT('%',#{search},'%')
+            AND pe.doctor_id = #{doctor_id}
+            AND p.patient_id = m.patient_id
+            AND p.patient_id = pe.patient_id
+        <if test="search != null">
+            AND p.name LIKE CONCAT('%',#{search},'%')
+        </if>
+        <if test="review_status != null">
+            AND m.review_status = #{review_status}
+        </if>
+        <if test="patient_status != null">
+            AND m.patient_status = #{patient_status}
+        </if>
+        <if test="appointment_status != null">
+            AND pe.status = #{appointment_status}
+        </if>
+        </where>
     </select>
     <select id="getMedicalRecords"
             resultType="com.example.youyiguanbackend.models.doctor.model.pojo.MedicalRecords">

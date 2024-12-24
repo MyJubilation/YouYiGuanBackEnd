@@ -83,7 +83,7 @@ public class DoctorController {
      * 医生注册相关功能
      */
     public Result<?> register(@RequestBody RegisterDTO registerDTO) {
-        // TODO 接收存入后的doctor_id和status
+        // 接收存入后的doctor_id和status
         RegisterVO registerVO = doctorService.register(registerDTO);
         if(registerVO != null){
             return Result.success().code(200).message("注册成功").data(registerVO);
