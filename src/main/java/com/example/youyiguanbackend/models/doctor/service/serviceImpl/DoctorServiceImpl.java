@@ -59,7 +59,7 @@ public class DoctorServiceImpl implements DoctorService {
 
     @Override
     /**
-     * TODO 获取验证码文本并发送验证码到对应手机号
+     * 获取验证码文本并发送验证码到对应手机号
      */
     public boolean sendCode(String phoneNumber) {
         // 获取验证码

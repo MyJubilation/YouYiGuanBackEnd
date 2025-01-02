@@ -10,24 +10,90 @@
     </update>
     <update id="diagnose">
         UPDATE patient
-        SET
-            tongue_condition = #{tongue_condition},
-            pulse_condition = #{pulse_condition},
-            symptoms = {symptoms},
-            height = #{height},
-            weight = #{weight})
+        <set>
+            <if test="tongue_condition != null">
+                tongue_condition = #{tongue_condition},
+            </if>
+            <if test="pulse_condition != null">
+                pulse_condition = #{pulse_condition},
+            </if>
+            <if test="symptoms != null">
+                symptoms = #{symptoms},
+            </if>
+            <if test="height != null">
+                height = #{height},
+            </if>
+            <if test="weight != null">
+                weight = #{weight}
+            </if>
+        </set>
         WHERE
             patient_id = #{patient_id}
     </update>
     <update id="diagnosisUpdate">
         UPDATE medicalrecord
         <set>
+<!--            <if test="symptoms != null">-->
+<!--                symptoms = #{symptoms},-->
+<!--            </if>-->
+            <if test="diagnosisUpdateDTO.diagnosis != null">
+                diagnosis = #{diagnosisUpdateDTO.diagnosis},
+            </if>
+            <if test="diagnosisUpdateDTO.recipe_name != null">
+                recipe_name = #{diagnosisUpdateDTO.recipe_name},
+            </if>
+            <if test="diagnosisUpdateDTO.recipe_details != null">
+                recipe_details = #{diagnosisUpdateDTO.recipe_details},
+            </if>
+            <if test="diagnosisUpdateDTO.paozhi != null">
+                paozhi = #{diagnosisUpdateDTO.paozhi},
+            </if>
+            <if test="diagnosisUpdateDTO.remarks != null">
+                remarks = #{diagnosisUpdateDTO.remarks},
+            </if>
+<!--            <if test="patient_status != null">-->
+<!--                patient_status = #{patient_status},-->
+<!--            </if>-->
+<!--            <if test="payment_status != null">-->
+<!--                payment_status = #{payment_status},-->
+<!--            </if>-->
+        </set>
+        WHERE
+            record_id = #{recordId}
+    </update>
+    <update id="updatepatient">
+        UPDATE patient
+        <set>
+            <if test="tongue_condition != null">
+                tongue_condition = #{tongue_condition},
+            </if>
+            <if test="pulse_condition != null">
+                pulse_condition = #{pulse_condition},
+            </if>
             <if test="symptoms != null">
                 symptoms = #{symptoms},
             </if>
-            <if test="diagnosis != null">
-                diagnosis = #{diagnosis},
+            <if test="height != null">
+                height = #{height},
             </if>
+            <if test="weight != null">
+                weight = #{weight}
+            </if>
+        </set>
+        WHERE
+        patient_id = #{patient_id}
+    </update>
+    <update id="audit">
+        UPDATE medicalrecord
+        SET
+            review_status = "已审核"
+        WHERE
+            record_id = #{recordId}
+    </update>
+    <update id="conclusion">
+        UPDATE medicalrecord
+        <set>
+            diagnosis = #{diagnosis},
             <if test="recipe_name != null">
                 recipe_name = #{recipe_name},
             </if>
@@ -38,17 +104,9 @@
                 paozhi = #{paozhi},
             </if>
             <if test="remarks != null">
-                remarks = #{remarks},
-            </if>
-            <if test="patient_status != null">
-                patient_status = #{patient_status},
-            </if>
-            <if test="payment_status != null">
-                payment_status = #{payment_status},
+                remarks = #{remarks}
             </if>
         </set>
-        WHERE
-            record_id = #{recordId}
     </update>
     <select id="getAppointment" resultType="com.example.youyiguanbackend.models.doctor.model.pojo.Appointment">
         SELECT *
@@ -86,13 +144,14 @@
         <selectKey keyProperty="record_id" resultType="int" order="AFTER">
             SELECT LAST_INSERT_ID()
         </selectKey>
-        INSERT INTO medicalrecord (patient_id, doctor_id, visit_date, review_status, patient_status, payment_status)
+        INSERT INTO medicalrecord (patient_id, doctor_id, visit_date, review_status, patient_status, payment_status, recipe_type)
         VALUES (
                 #{patient_id},
                 #{doctor_id},
                 #{visit_date},
                 #{review_status},
                 #{patient_status},
-                #{payment_status})
+                #{payment_status},
+                "standard")
     </insert>
 </mapper>

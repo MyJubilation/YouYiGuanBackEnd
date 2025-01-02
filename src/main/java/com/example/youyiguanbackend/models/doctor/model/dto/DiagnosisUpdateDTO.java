@@ -4,6 +4,7 @@ import lombok.Data;
 
 @Data
 public class DiagnosisUpdateDTO {
+    private int record_id;
     private String symptoms;
     private String diagnosis;
     private String recipe_name;

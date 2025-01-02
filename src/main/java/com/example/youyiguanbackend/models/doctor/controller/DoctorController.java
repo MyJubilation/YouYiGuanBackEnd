@@ -24,6 +24,7 @@ import java.util.Map;
 @RequestMapping("/api/doctor")
 /**
  * 医生功能
+ * TODO 人脸库相关功能api投入生产环境时需要更换，当前为个人用户人脸库，企业使用时有隐患
  */
 public class DoctorController {
 

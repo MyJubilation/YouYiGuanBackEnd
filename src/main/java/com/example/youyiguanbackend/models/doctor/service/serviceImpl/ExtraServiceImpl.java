@@ -39,8 +39,36 @@ public class ExtraServiceImpl implements ExtraService {
     }
 
     @Override
+    public int appointmentConfirmNew(int appointmentId) {
+        // 修改appointment的status
+        int cnt = extraMapper.setAppointment(appointmentId);
+        if(cnt != 0){
+            // 获取appointment值
+            Appointment appointment = extraMapper.getAppointment(appointmentId);
+            // 获取medical_record值
+            MedicalRecordPOJO medicalRecordPOJO = new MedicalRecordPOJO();
+            medicalRecordPOJO.setPatient_id(appointment.getPatient_id());
+            medicalRecordPOJO.setDoctor_id(appointment.getDoctor_id());
+            extraMapper.getMedicalRecordId(medicalRecordPOJO);
+            MedicalRecord medicalRecord = extraMapper.getMedicalRecord(medicalRecordPOJO.getRecord_id());
+            // 赋值给VO并返回
+            GetApplicationVO getApplicationVO = new GetApplicationVO();
+            getApplicationVO.setAppointment(appointment);
+            getApplicationVO.setMedical_record(medicalRecord);
+            return 1;
+        }else {
+            return 0;
+        }
+    }
+
+    @Override
     public DiagnoseVO diagnose(DiagnoseDTO diagnoseDTO) {
         return extraMapper.diagnose(diagnoseDTO);
+    }
+
+    @Override
+    public int updatepatient(DiagnoseDTO diagnoseDTO) {
+        return extraMapper.updatepatient(diagnoseDTO);
     }
 
     @Override
@@ -54,5 +82,15 @@ public class ExtraServiceImpl implements ExtraService {
         }else {
             return null;
         }
+    }
+
+    @Override
+    public int conclusion(DiagnosisUpdateDTO diagnosisUpdateDTO) {
+        return extraMapper.conclusion(diagnosisUpdateDTO);
+    }
+
+    @Override
+    public int audit(int recordId) {
+        return extraMapper.audit(recordId);
     }
 }

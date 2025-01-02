@@ -23,4 +23,10 @@ public interface ExtraMapper {
     void diagnosisUpdate(int recordId, DiagnosisUpdateDTO diagnosisUpdateDTO);
 
     DiagnosisUpdateVO selectByRecordId(int recordId);
+
+    int updatepatient(DiagnoseDTO diagnoseDTO);
+
+    int audit(int recordId);
+
+    int conclusion(DiagnosisUpdateDTO diagnosisUpdateDTO);
 }

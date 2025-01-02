@@ -13,4 +13,12 @@ public interface ExtraService {
     DiagnoseVO diagnose(DiagnoseDTO diagnoseDTO);
 
     DiagnosisUpdateVO diagnosisUpdate(int recordId, DiagnosisUpdateDTO diagnosisUpdateDTO, String username);
+
+    int appointmentConfirmNew(int appointmentId);
+
+    int updatepatient(DiagnoseDTO diagnoseDTO);
+
+    int audit(int recordId);
+
+    int conclusion(DiagnosisUpdateDTO diagnosisUpdateDTO);
 }

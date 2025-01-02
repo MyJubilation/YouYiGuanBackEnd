@@ -25,34 +25,50 @@ public class ExtraController {
 
     /**
      * 医生确认预约并更新数据库
-     * @param applicationDTO
-     * @return Result
      */
-    @PostMapping("/appointment/confirm")
-    public Result<?> appointmentConfirm(@RequestBody GetApplicationDTO applicationDTO) {
-        GetApplicationVO vo = extraService.appointmentConfirm(applicationDTO);
-        if(vo != null) {
-            return Result.success(vo);
+    @PostMapping("/appointment/confirm/{appointmentId}")
+    public Result<?> appointmentConfirm(@PathVariable int appointmentId) {
+        // @RequestBody GetApplicationDTO applicationDTO 原api输入
+//        GetApplicationVO vo = extraService.appointmentConfirm(applicationDTO);
+        int result = extraService.appointmentConfirmNew(appointmentId);
+        /**
+         * 新更新的api中不用返回vo
+         * 如果需要返回，则直接在返回data加上vo
+         */
+        if(result != 0) {
+            return Result.success();
         }else {
             return Result.error(401,"预约确认失败，请检查参数");
         }
     }
     /**
-     * 医生为病人诊断
-     * TODO 一些问题未解决
+     * 医生为病人更新信息
      */
-    @PutMapping("/doctors/diagnose")
-    public Result<?> diagnose(@RequestBody DiagnoseDTO diagnoseDTO) {
-        DiagnoseVO diagnoseVO = extraService.diagnose(diagnoseDTO);
-        if(diagnoseVO != null) {
-            return Result.success(diagnoseVO);
+    @PutMapping("/doctors/diagnose/updatepatient")
+    public Result<?> updatepatient(@RequestBody DiagnoseDTO diagnoseDTO) {
+//        DiagnoseVO diagnoseVO = extraService.diagnose(diagnoseDTO);
+        int result = extraService.updatepatient(diagnoseDTO);
+        if(result != 0) {
+            return Result.success().message("诊断信息更新成功");
         }else {
             return Result.error(401,"修改失败");
         }
     }
     /**
+     * 医生为病人下诊断结论
+     */
+    @PutMapping("/doctors/diagnose/conclusion")
+    public Result<?> conclusion(@RequestBody DiagnosisUpdateDTO diagnosisUpdateDTO) {
+        int result = extraService.conclusion(diagnosisUpdateDTO);
+        if(result != 0){
+            return Result.success();
+        }else {
+            return Result.error(401,"诊断失败");
+        }
+    }
+
+    /**
      * 修改诊断记录
-     *  TODO symptom属性在数据库中不存在
      */
     @PutMapping("/diagnosis/{record_id}")
     public Result<?> diagnosisUpdate(@PathVariable int record_id,
@@ -64,11 +80,26 @@ public class ExtraController {
         String username = getUserNameByToken(token);
         DiagnosisUpdateVO diagnosisUpdateVO = extraService.diagnosisUpdate(record_id,diagnosisUpdateDTO,username);
         if(diagnosisUpdateVO != null) {
-            return Result.success(diagnosisUpdateVO);
+            return Result.success().message("诊断记录修改成功");
         }else {
             return Result.error(401,"诊断记录无法修改，当前状态不允许修改");
         }
     }
+    /**
+     * 医生审核诊断记录
+     */
+    @PutMapping("/diagnosis/audit/{record_id}")
+    public Result<?> audit(@PathVariable int record_id){
+        int result = extraService.audit(record_id);
+        if(result != 0) {
+            return Result.success().message("该诊断记录状态改为已审核");
+        }else {
+            return Result.error(500,"错误");
+        }
+    }
+    /**
+     * TODO 智能审核药方
+     */
 
 
     /**
